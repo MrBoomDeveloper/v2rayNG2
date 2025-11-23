@@ -4,7 +4,7 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.dto.ConfigResult
 import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.dto.NetworkType
@@ -146,10 +146,10 @@ object V2rayConfigManager {
 
         getDns(v2rayConfig)
 
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true) {
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED)) {
             getCustomLocalDns(v2rayConfig)
         }
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) {
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED)) {
             v2rayConfig.stats = null
             v2rayConfig.policy = null
         }
@@ -223,10 +223,10 @@ object V2rayConfigManager {
 
         getBalance(v2rayConfig)
 
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true) {
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED)) {
             getCustomLocalDns(v2rayConfig)
         }
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) {
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED)) {
             v2rayConfig.stats = null
             v2rayConfig.policy = null
         }
@@ -324,15 +324,15 @@ object V2rayConfigManager {
             val socksPort = SettingsManager.getSocksPort()
 
             v2rayConfig.inbounds.forEach { curInbound ->
-                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING) != true) {
+                if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING)) {
                     //bind all inbounds to localhost if the user requests
                     curInbound.listen = AppConfig.LOOPBACK
                 }
             }
             v2rayConfig.inbounds[0].port = socksPort
-            val fakedns = MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true
+            val fakedns = MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED)
             val sniffAllTlsAndHttp =
-                MmkvManager.decodeSettingsBool(AppConfig.PREF_SNIFFING_ENABLED, true) != false
+                MmkvManager.decodeSettingsBool(AppConfig.PREF_SNIFFING_ENABLED, true)
             v2rayConfig.inbounds[0].sniffing?.enabled = fakedns || sniffAllTlsAndHttp
             v2rayConfig.inbounds[0].sniffing?.routeOnly =
                 MmkvManager.decodeSettingsBool(AppConfig.PREF_ROUTE_ONLY_ENABLED, false)
@@ -365,9 +365,8 @@ object V2rayConfigManager {
      * @param v2rayConfig The V2ray configuration object to be modified
      */
     private fun getFakeDns(v2rayConfig: V2rayConfig) {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true
-            && MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true
-        ) {
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) 
+            && MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED)) {
             v2rayConfig.fakedns = listOf(V2rayConfig.FakednsBean())
         }
     }
@@ -382,7 +381,6 @@ object V2rayConfigManager {
      */
     private fun getRouting(v2rayConfig: V2rayConfig): Boolean {
         try {
-
             v2rayConfig.routing.domainStrategy =
                 MmkvManager.decodeSettingsString(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY)
                     ?: "AsIs"
@@ -456,7 +454,7 @@ object V2rayConfigManager {
      */
     private fun getCustomLocalDns(v2rayConfig: V2rayConfig): Boolean {
         try {
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true) {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED)) {
                 val geositeCn = arrayListOf(AppConfig.GEOSITE_CN)
                 val proxyDomain = getUserRule2Domain(AppConfig.TAG_PROXY)
                 val directDomain = getUserRule2Domain(AppConfig.TAG_DIRECT)
@@ -470,7 +468,7 @@ object V2rayConfigManager {
                 )
             }
 
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_HEV_TUNNEL ,true) == false) {
+            if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_HEV_TUNNEL ,true)) {
 
                 // DNS inbound
                 val remoteDns = SettingsManager.getRemoteDnsServers()
@@ -604,7 +602,7 @@ object V2rayConfigManager {
             try {
                 val userHosts = MmkvManager.decodeSettingsString(AppConfig.PREF_DNS_HOSTS)
                 if (userHosts.isNotNullEmpty()) {
-                    var userHostsMap = userHosts?.split(",")
+                    val userHostsMap = userHosts?.split(",")
                         ?.filter { it.isNotEmpty() }
                         ?.filter { it.contains(":") }
                         ?.associate { it.split(":").let { (k, v) -> k to v } }
@@ -722,7 +720,7 @@ object V2rayConfigManager {
      */
     private fun getMoreOutbounds(v2rayConfig: V2rayConfig, subscriptionId: String): Boolean {
         //fragment proxy
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FRAGMENT_ENABLED, false) == true) {
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FRAGMENT_ENABLED, false)) {
             return false
         }
 
@@ -810,7 +808,7 @@ object V2rayConfigManager {
                 } else {
                     outbound.settings?.address as List<*>
                 }
-                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6) != true) {
+                if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6)) {
                     localTunAddr = listOf(localTunAddr.first())
                 }
                 outbound.settings?.address = localTunAddr
@@ -928,7 +926,7 @@ object V2rayConfigManager {
      */
     private fun updateOutboundFragment(v2rayConfig: V2rayConfig): Boolean {
         try {
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FRAGMENT_ENABLED, false) == false) {
+            if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_FRAGMENT_ENABLED, false)) {
                 return true
             }
             if (v2rayConfig.outbounds[0].streamSettings?.security != AppConfig.TLS
@@ -1003,7 +1001,7 @@ object V2rayConfigManager {
         val proxyOutboundList = v2rayConfig.getAllProxyOutbound()
         val dns = v2rayConfig.dns ?: return
         val newHosts = dns.hosts?.toMutableMap() ?: mutableMapOf()
-        val preferIpv6 = MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6) == true
+        val preferIpv6 = MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6)
 
         for (item in proxyOutboundList) {
             val domain = item.getServerAddress()
@@ -1132,7 +1130,7 @@ object V2rayConfigManager {
         val xhttpExtra = profileItem.xhttpExtra
 
         var sni: String? = null
-        streamSettings.network = if (transport.isEmpty()) NetworkType.TCP.type else transport
+        streamSettings.network = transport.ifEmpty { NetworkType.TCP.type }
         when (streamSettings.network) {
             NetworkType.TCP.type -> {
                 val tcpSetting = StreamSettingsBean.TcpSettingsBean()
@@ -1253,7 +1251,7 @@ object V2rayConfigManager {
         val spiderX = profileItem.spiderX
         val mldsa65Verify = profileItem.mldsa65Verify
 
-        streamSettings.security = if (streamSecurity.isEmpty()) null else streamSecurity
+        streamSettings.security = streamSecurity.ifEmpty { null }
         if (streamSettings.security == null) return
         val tlsSetting = StreamSettingsBean.TlsSettingsBean(
             allowInsecure = allowInsecure,

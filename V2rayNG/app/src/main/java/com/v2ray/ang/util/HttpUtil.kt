@@ -3,7 +3,7 @@ package com.v2ray.ang.util
 import android.util.Log
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.LOOPBACK
-import com.v2ray.ang.BuildConfig
+import com.mrboomdev.v2rayng2.BuildConfig
 import com.v2ray.ang.util.Utils.encode
 import com.v2ray.ang.util.Utils.urlDecode
 import java.io.IOException

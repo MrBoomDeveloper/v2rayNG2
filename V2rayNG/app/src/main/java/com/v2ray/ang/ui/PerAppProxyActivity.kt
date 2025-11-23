@@ -11,8 +11,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityBypassListBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityBypassListBinding
 import com.v2ray.ang.dto.AppInfo
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastSuccess

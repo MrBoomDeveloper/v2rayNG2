@@ -1,6 +1,7 @@
 package com.v2ray.ang.service
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.v2ray.ang.AppConfig.MSG_MEASURE_CONFIG
@@ -47,7 +48,7 @@ class V2RayTestService : Service() {
             MSG_MEASURE_CONFIG -> {
                 val guid = intent.serializable<String>("content") ?: ""
                 realTestScope.launch {
-                    val result = startRealPing(guid)
+                    val result = startRealPing(this@V2RayTestService, guid)
                     MessageUtil.sendMsg2UI(this@V2RayTestService, MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
                 }
             }
@@ -58,34 +59,33 @@ class V2RayTestService : Service() {
         }
         return super.onStartCommand(intent, flags, startId)
     }
+    
+    override fun onBind(intent: Intent?): IBinder? = null
+    
+    companion object {
+        /**
+         * Starts the real ping test.
+         * @param guid The GUID of the configuration.
+         * @return The ping result.
+         */
+        fun startRealPing(
+            context: Context,
+            guid: String
+        ): Long {
+            val retFailure = -1L
 
-    /**
-     * Binds the service.
-     * @param intent The intent.
-     * @return The binder.
-     */
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+            val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
+            if(config.configType == EConfigType.HYSTERIA2) {
+                val delay = PluginServiceManager.realPingHy2(context, config)
+                return delay
+            } else {
+                val configResult = V2rayConfigManager.getV2rayConfig4Speedtest(context, guid)
+                if(!configResult.status) {
+                    return retFailure
+                }
 
-    /**
-     * Starts the real ping test.
-     * @param guid The GUID of the configuration.
-     * @return The ping result.
-     */
-    private fun startRealPing(guid: String): Long {
-        val retFailure = -1L
-
-        val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
-        if (config.configType == EConfigType.HYSTERIA2) {
-            val delay = PluginServiceManager.realPingHy2(this, config)
-            return delay
-        } else {
-            val configResult = V2rayConfigManager.getV2rayConfig4Speedtest(this, guid)
-            if (!configResult.status) {
-                return retFailure
+                return SpeedtestManager.realPing(configResult.content)
             }
-            return SpeedtestManager.realPing(configResult.content)
         }
     }
 }

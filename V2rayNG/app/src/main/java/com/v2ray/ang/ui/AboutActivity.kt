@@ -10,9 +10,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.BuildConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityAboutBinding
+import com.mrboomdev.v2rayng2.BuildConfig
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityAboutBinding
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.extension.toastSuccess
@@ -25,22 +25,22 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AboutActivity : BaseActivity() {
-
     private val binding by lazy { ActivityAboutBinding.inflate(layoutInflater) }
     private val extDir by lazy { File(Utils.backupPath(this)) }
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                try {
-                    showFileChooser()
-                } catch (e: Exception) {
-                    Log.e(AppConfig.TAG, "Failed to show file chooser", e)
-                }
-            } else {
-                toast(R.string.toast_permission_denied)
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if(isGranted) {
+            try {
+                showFileChooser()
+            } catch(e: Exception) {
+                Log.e(AppConfig.TAG, "Failed to show file chooser", e)
             }
+        } else {
+            toast(R.string.toast_permission_denied)
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,10 +118,6 @@ class AboutActivity : BaseActivity() {
 
         binding.layoutTgChannel.setOnClickListener {
             Utils.openUri(this, AppConfig.TG_CHANNEL_URL)
-        }
-
-        binding.layoutPrivacyPolicy.setOnClickListener {
-            Utils.openUri(this, AppConfig.APP_PRIVACY_POLICY)
         }
 
         "v${BuildConfig.VERSION_NAME} (${SpeedtestManager.getLibVersion()})".also {

@@ -9,7 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.widget.RemoteViews
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.handler.V2RayServiceManager
 
 class WidgetProvider : AppWidgetProvider() {

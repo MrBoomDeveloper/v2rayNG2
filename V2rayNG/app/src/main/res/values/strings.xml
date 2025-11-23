@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">v2rayNG</string>
+    <string name="app_name" translatable="false">v2rayNG2</string>
     <string name="app_widget_name">Switch</string>
     <string name="app_tile_name">Switch</string>
     <string name="app_tile_first_use">First use of this feature, please use the app to add server</string>
@@ -27,7 +27,7 @@
     <string name="menu_item_del_config">Delete configuration</string>
     <string name="menu_item_import_config_qrcode">Import configuration from QRcode</string>
     <string name="menu_item_import_config_clipboard">Import configuration from Clipboard</string>
-    <string name="menu_item_import_config_local">Import configuration from locally</string>
+    <string name="menu_item_import_config_local">Import configuration from file</string>
     <string name="menu_item_import_config_manually_vmess">Type manually[VMess]</string>
     <string name="menu_item_import_config_manually_vless">Type manually[VLESS]</string>
     <string name="menu_item_import_config_manually_ss">Type manually[Shadowsocks]</string>

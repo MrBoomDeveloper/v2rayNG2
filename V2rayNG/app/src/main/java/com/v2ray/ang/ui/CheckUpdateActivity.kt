@@ -5,9 +5,9 @@ import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.BuildConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityCheckUpdateBinding
+import com.mrboomdev.v2rayng2.BuildConfig
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityCheckUpdateBinding
 import com.v2ray.ang.dto.CheckUpdateResult
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastError
@@ -19,7 +19,6 @@ import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.launch
 
 class CheckUpdateActivity : BaseActivity() {
-
     private val binding by lazy { ActivityCheckUpdateBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {

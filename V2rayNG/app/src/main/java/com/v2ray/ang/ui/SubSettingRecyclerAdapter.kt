@@ -11,9 +11,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ItemQrcodeBinding
-import com.v2ray.ang.databinding.ItemRecyclerSubSettingBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ItemQrcodeBinding
+import com.mrboomdev.v2rayng2.databinding.ItemRecyclerSubSettingBinding
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager

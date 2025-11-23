@@ -12,7 +12,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.handler.V2RayServiceManager
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils

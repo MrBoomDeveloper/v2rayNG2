@@ -8,8 +8,8 @@ import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivitySubSettingBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivitySubSettingBinding
 import com.v2ray.ang.dto.SubscriptionItem
 import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.extension.toastSuccess

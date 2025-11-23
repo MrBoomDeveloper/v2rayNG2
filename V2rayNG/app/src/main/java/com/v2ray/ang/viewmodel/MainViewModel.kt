@@ -13,7 +13,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
+import com.v2ray.ang.AppConfig.MSG_MEASURE_CONFIG_SUCCESS
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.ServersCache
 import com.v2ray.ang.extension.serializable
@@ -23,14 +24,23 @@ import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SpeedtestManager
+import com.v2ray.ang.service.V2RayTestService.Companion.startRealPing
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
+import go.Seq
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
+import libv2ray.Libv2ray
 import java.util.Collections
+import java.util.concurrent.Executors
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = MmkvManager.decodeServerList()
@@ -72,6 +82,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun reloadServerList() {
         serverList = MmkvManager.decodeServerList()
         updateCache()
+        updateListAction.value = -1
+    }
+    
+    fun updateListUi() {
         updateListAction.value = -1
     }
 
@@ -236,8 +250,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         val serversCopy = serversCache.toList()
         viewModelScope.launch(Dispatchers.Default) {
-            for (item in serversCopy) {
+            for(item in serversCopy) {
                 MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG, item.guid)
+            }
+        }
+    }
+
+    suspend fun testAllRealPingSync(
+        context: Context
+    ): Flow<Pair<Int, Int>> {
+        MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG_CANCEL, "")
+        MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
+        
+        viewModelScope.async(Dispatchers.Main) {
+            updateListAction.value = -1
+        }.await()
+
+        return channelFlow {
+            val serversCopy = serversCache.toList()
+            var count = 0
+            send(0 to serversCopy.size)
+
+            Seq.setContext(context)
+            Libv2ray.initCoreEnv(Utils.userAssetPath(context), Utils.getDeviceIdForXUDPBaseKey())
+            
+            for(server in serversCopy) {
+                launch(Dispatchers.IO) {
+                    val result = startRealPing(context, server.guid)
+                    MessageUtil.sendMsg2UI(context, MSG_MEASURE_CONFIG_SUCCESS, Pair(server.guid, result))
+                    
+                    count++
+                    send(count to serversCopy.size)
+                }
             }
         }
     }

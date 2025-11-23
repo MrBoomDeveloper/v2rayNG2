@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.v2ray.ang.databinding.ItemRecyclerBypassListBinding
+import com.mrboomdev.v2rayng2.databinding.ItemRecyclerBypassListBinding
 import com.v2ray.ang.dto.AppInfo
 
 class PerAppProxyAdapter(val activity: BaseActivity, val apps: List<AppInfo>, blacklist: MutableSet<String>?) :

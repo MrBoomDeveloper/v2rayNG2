@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.BuildConfig
+import com.mrboomdev.v2rayng2.BuildConfig
 import com.v2ray.ang.dto.CheckUpdateResult
 import com.v2ray.ang.dto.GitHubRelease
 import com.v2ray.ang.extension.concatUrl

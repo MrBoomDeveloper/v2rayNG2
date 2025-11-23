@@ -5,18 +5,18 @@ import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.dto.IPAPIInfo
 import com.v2ray.ang.extension.responseLength
 import com.v2ray.ang.util.HttpUtil
 import com.v2ray.ang.util.JsonUtil
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import libv2ray.Libv2ray
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.UnknownHostException
-import kotlin.coroutines.coroutineContext
 
 object SpeedtestManager {
 
@@ -33,7 +33,7 @@ object SpeedtestManager {
         var time = -1L
         for (k in 0 until 2) {
             val one = socketConnectTime(url, port)
-            if (!coroutineContext.isActive) {
+            if (!currentCoroutineContext().isActive) {
                 break
             }
             if (one != -1L && (time == -1L || one < time)) {

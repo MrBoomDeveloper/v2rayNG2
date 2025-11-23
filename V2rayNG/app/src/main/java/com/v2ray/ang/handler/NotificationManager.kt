@@ -12,7 +12,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.extension.toSpeedString
 import com.v2ray.ang.handler.V2RayServiceManager

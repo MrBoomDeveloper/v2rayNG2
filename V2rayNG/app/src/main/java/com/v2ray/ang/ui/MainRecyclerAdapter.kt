@@ -13,10 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.AngApplication.Companion.application
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ItemQrcodeBinding
-import com.v2ray.ang.databinding.ItemRecyclerFooterBinding
-import com.v2ray.ang.databinding.ItemRecyclerMainBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ItemQrcodeBinding
+import com.mrboomdev.v2rayng2.databinding.ItemRecyclerFooterBinding
+import com.mrboomdev.v2rayng2.databinding.ItemRecyclerMainBinding
 import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.extension.toast

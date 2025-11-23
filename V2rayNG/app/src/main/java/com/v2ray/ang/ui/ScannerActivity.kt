@@ -12,7 +12,7 @@ import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.QRCodeDecoder
@@ -21,8 +21,6 @@ import io.github.g00fy2.quickie.ScanCustomCode
 import io.github.g00fy2.quickie.config.ScannerConfig
 
 class ScannerActivity : BaseActivity() {
-
-
     private val scanQrCode = registerForActivityResult(ScanCustomCode(), ::handleResult)
     private val chooseFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         val uri = it.data?.data
@@ -58,10 +56,7 @@ class ScannerActivity : BaseActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_START_SCAN_IMMEDIATE) == true) {
-            launchScan()
-        }
+        launchScan()
     }
 
     private fun launchScan() {

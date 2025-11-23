@@ -1,11 +1,13 @@
 package com.v2ray.ang
 
+import com.mrboomdev.v2rayng2.BuildConfig
+
 
 object AppConfig {
 
     /** The application's package name. */
     const val ANG_PACKAGE = BuildConfig.APPLICATION_ID
-    const val TAG = BuildConfig.APPLICATION_ID
+    const val TAG = "V2RayNG2"
 
     /** Directory names used in the app's file system. */
     const val DIR_ASSETS = "assets"
@@ -103,13 +105,11 @@ object AppConfig {
     const val GITHUB_RAW_URL = "https://raw.githubusercontent.com"
     const val GITHUB_DOWNLOAD_URL = "$GITHUB_URL/%s/releases/latest/download"
     const val ANDROID_PACKAGE_NAME_LIST_URL = "$GITHUB_RAW_URL/2dust/androidpackagenamelist/master/proxy.txt"
-    const val APP_URL = "$GITHUB_URL/2dust/v2rayNG"
-    const val APP_API_URL = "https://api.github.com/repos/2dust/v2rayNG/releases"
+    const val APP_URL = "$GITHUB_URL/MrBoomDeveloper/v2rayNG2"
+    const val APP_API_URL = "https://api.github.com/repos/MrBoomDeveloper/v2rayNG2/releases"
     const val APP_ISSUES_URL = "$APP_URL/issues"
     const val APP_WIKI_MODE = "$APP_URL/wiki/Mode"
-    const val APP_PRIVACY_POLICY = "$GITHUB_RAW_URL/2dust/v2rayNG/master/CR.md"
-    const val APP_PROMOTION_URL = "aHR0cHM6Ly85LjIzNDQ1Ni54eXovYWJjLmh0bWw="
-    const val TG_CHANNEL_URL = "https://t.me/github_2dust"
+    const val TG_CHANNEL_URL = "https://t.me/mrboomdev_channel"
     const val DELAY_TEST_URL = "https://www.gstatic.com/generate_204"
     const val DELAY_TEST_URL2 = "https://www.google.com/generate_204"
     const val IP_API_URL = "https://speed.cloudflare.com/meta"
@@ -255,5 +255,4 @@ object AppConfig {
         "runetfreedom/russia-v2ray-rules-dat",
         "Chocolate4U/Iran-v2ray-rules"
     )
-
 }

@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityLogcatBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityLogcatBinding
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.handler.AngConfigManager

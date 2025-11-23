@@ -20,17 +20,21 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityMainBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityMainBinding
+import com.mrboomdev.v2rayng2.utils.colorStateListOf
+import com.mrboomdev.v2rayng2.utils.setColor
 import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastError
@@ -41,68 +45,86 @@ import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.handler.V2RayServiceManager
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private val binding by lazy {
-        ActivityMainBinding.inflate(layoutInflater)
-    }
-
+    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val adapter by lazy { MainRecyclerAdapter(this) }
-    private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
+    private var mItemTouchHelper: ItemTouchHelper? = null
+    private var pendingAction: Action = Action.NONE
+    val mainViewModel: MainViewModel by viewModels()
+    
+    private val requestVpnPermission = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if(it.resultCode == RESULT_OK) {
             startV2Ray()
         }
     }
-    private val requestSubSettingActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    
+    private val requestSubSettingActivity = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
         initGroupTab()
     }
+
+    private val chooseFileForCustomConfig = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        val uri = it.data?.data
+        if(it.resultCode == RESULT_OK && uri != null) {
+            readContentFromUri(uri)
+        }
+    }
+
+    private val scanQRCodeForConfig = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if(it.resultCode == RESULT_OK) {
+            importBatchConfig(it.data?.getStringExtra("SCAN_RESULT"))
+        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if(isGranted) {
+            when(pendingAction) {
+                Action.IMPORT_QR_CODE_CONFIG ->
+                    scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
+
+                Action.READ_CONTENT_FROM_URI ->
+                    chooseFileForCustomConfig.launch(Intent.createChooser(Intent(Intent.ACTION_GET_CONTENT).apply {
+                        type = "*/*"
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                    }, getString(R.string.title_file_chooser)))
+
+                Action.POST_NOTIFICATIONS -> {}
+                else -> {}
+            }
+        } else {
+            toast(R.string.toast_permission_denied)
+        }
+
+        pendingAction = Action.NONE
+    }
+    
     private val tabGroupListener = object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab?) {
             val selectId = tab?.tag.toString()
-            if (selectId != mainViewModel.subscriptionId) {
+            if(selectId != mainViewModel.subscriptionId) {
                 mainViewModel.subscriptionIdChanged(selectId)
             }
         }
 
-        override fun onTabUnselected(tab: TabLayout.Tab?) {
-        }
-
-        override fun onTabReselected(tab: TabLayout.Tab?) {
-        }
+        override fun onTabUnselected(tab: TabLayout.Tab?) {}
+        override fun onTabReselected(tab: TabLayout.Tab?) {}
     }
-    private var mItemTouchHelper: ItemTouchHelper? = null
-    val mainViewModel: MainViewModel by viewModels()
-
-    // register activity result for requesting permission
-    private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                when (pendingAction) {
-                    Action.IMPORT_QR_CODE_CONFIG ->
-                        scanQRCodeForConfig.launch(Intent(this, ScannerActivity::class.java))
-
-                    Action.READ_CONTENT_FROM_URI ->
-                        chooseFileForCustomConfig.launch(Intent.createChooser(Intent(Intent.ACTION_GET_CONTENT).apply {
-                            type = "*/*"
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                        }, getString(R.string.title_file_chooser)))
-
-                    Action.POST_NOTIFICATIONS -> {}
-                    else -> {}
-                }
-            } else {
-                toast(R.string.toast_permission_denied)
-            }
-            pendingAction = Action.NONE
-        }
-
-    private var pendingAction: Action = Action.NONE
 
     enum class Action {
         NONE,
@@ -111,25 +133,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         POST_NOTIFICATIONS
     }
 
-    private val chooseFileForCustomConfig = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val uri = it.data?.data
-        if (it.resultCode == RESULT_OK && uri != null) {
-            readContentFromUri(uri)
-        }
-    }
-
-    private val scanQRCodeForConfig = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            importBatchConfig(it.data?.getStringExtra("SCAN_RESULT"))
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        title = getString(R.string.title_server)
         setSupportActionBar(binding.toolbar)
-
+        title = getString(R.string.title_server)
+        
         binding.fab.setOnClickListener {
             if (mainViewModel.isRunning.value == true) {
                 V2RayServiceManager.stopVService(this)
@@ -210,16 +219,19 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             adapter.isRunning = isRunning
             if (isRunning) {
                 binding.fab.setImageResource(R.drawable.ic_stop_24dp)
-                binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_active))
+                binding.fab.backgroundTintList = colorStateListOf(this, com.google.android.material.R.color.material_dynamic_primary80)
+                binding.fab.drawable.setColor(this, com.google.android.material.R.color.material_dynamic_primary0)
                 setTestState(getString(R.string.connection_connected))
                 binding.layoutTest.isFocusable = true
             } else {
                 binding.fab.setImageResource(R.drawable.ic_play_24dp)
-                binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
+                binding.fab.backgroundTintList = colorStateListOf(this, com.google.android.material.R.color.material_dynamic_primary40)
+                binding.fab.drawable.setColor(this, com.google.android.material.R.color.material_dynamic_primary80)
                 setTestState(getString(R.string.connection_not_connected))
                 binding.layoutTest.isFocusable = false
             }
         }
+        
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
     }
@@ -312,7 +324,45 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
+        R.id.kawaii_update_group -> {
+            val dialog = MaterialAlertDialogBuilder(this)
+                .setTitle("Updating subscription")
+                .setMessage("Please wait a little bit...")
+                .setCancelable(false)
+                .show()
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                mainViewModel.updateConfigViaSubAll()
+                withContext(Dispatchers.Main) {
+                    mainViewModel.reloadServerList()
+                    dialog.setTitle("Deleting duplicates") 
+                }
+                
+                mainViewModel.removeDuplicateServer()
+                withContext(Dispatchers.Main) {
+                    mainViewModel.reloadServerList()
+                    dialog.setTitle("Real delay testing")
+                }
+                
+                mainViewModel.testAllRealPingSync(this@MainActivity)
+                    .buffer(Runtime.getRuntime().availableProcessors())
+                    .collect { (tested, total) ->
+                        withContext(Dispatchers.Main) { dialog.setMessage("${tested}/${total}") } 
+                    }
+                
+                withContext(Dispatchers.Main) {
+                    mainViewModel.reloadServerList()
+                    mainViewModel.sortByTestResults()
+                    mainViewModel.reloadServerList()
+                    toast("Done updating!")
+                    dialog.dismiss()
+                }
+            }
+            
+            true
+        }
+        
         R.id.import_qrcode -> {
             importQRcode()
             true
@@ -422,8 +472,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             importConfigViaSub()
             true
         }
-
-
+        
         else -> super.onOptionsItemSelected(item)
     }
 
@@ -511,23 +560,24 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     /**
      * import config from sub
      */
-    private fun importConfigViaSub(): Boolean {
+    private fun importConfigViaSub() {
         binding.pbWaiting.show()
 
         lifecycleScope.launch(Dispatchers.IO) {
             val count = mainViewModel.updateConfigViaSubAll()
             delay(500L)
+            
             launch(Dispatchers.Main) {
-                if (count > 0) {
+                if(count > 0) {
                     toast(getString(R.string.title_update_config_count, count))
                     mainViewModel.reloadServerList()
                 } else {
                     toastError(R.string.toast_failure)
                 }
+                
                 binding.pbWaiting.hide()
             }
         }
-        return true
     }
 
     private fun exportAll() {
@@ -690,9 +740,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 Intent(this, SettingsActivity::class.java)
                     .putExtra("isRunning", mainViewModel.isRunning.value == true)
             )
-
-            R.id.promotion -> Utils.openUri(this, "${Utils.decode(AppConfig.APP_PROMOTION_URL)}?t=${System.currentTimeMillis()}")
-            R.id.logcat -> startActivity(Intent(this, LogcatActivity::class.java))
+            
             R.id.check_for_update -> startActivity(Intent(this, CheckUpdateActivity::class.java))
             R.id.about -> startActivity(Intent(this, AboutActivity::class.java))
         }

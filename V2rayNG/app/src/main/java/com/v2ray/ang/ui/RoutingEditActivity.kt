@@ -5,8 +5,8 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityRoutingEditBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityRoutingEditBinding
 import com.v2ray.ang.dto.RulesetItem
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastSuccess

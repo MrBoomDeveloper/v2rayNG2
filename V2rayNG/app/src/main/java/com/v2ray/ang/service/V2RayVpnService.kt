@@ -17,7 +17,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.LOOPBACK
-import com.v2ray.ang.BuildConfig
+import com.mrboomdev.v2rayng2.BuildConfig
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.NotificationManager
 import com.v2ray.ang.handler.SettingsManager

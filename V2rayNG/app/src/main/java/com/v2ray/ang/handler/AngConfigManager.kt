@@ -4,9 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.text.TextUtils
 import android.util.Log
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.HY2
-import com.v2ray.ang.R
 import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.SubscriptionItem
@@ -431,7 +431,7 @@ object AngConfigManager {
                 val httpPort = SettingsManager.getHttpPort()
                 HttpUtil.getUrlContentWithUserAgent(url, userAgent, 15000, httpPort)
             } catch (e: Exception) {
-                Log.e(AppConfig.ANG_PACKAGE, "Update subscription: proxy not ready or other error", e)
+                Log.e(AppConfig.TAG, "Update subscription: proxy not ready or other error", e)
                 ""
             }
             if (configText.isEmpty()) {

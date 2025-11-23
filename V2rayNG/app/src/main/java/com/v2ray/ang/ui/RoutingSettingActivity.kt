@@ -13,8 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityRoutingSettingBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityRoutingSettingBinding
 import com.v2ray.ang.dto.RulesetItem
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastError

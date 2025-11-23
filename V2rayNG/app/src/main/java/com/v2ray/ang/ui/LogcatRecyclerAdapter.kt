@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.databinding.ItemRecyclerLogcatBinding
+import com.mrboomdev.v2rayng2.databinding.ItemRecyclerLogcatBinding
 
 class LogcatRecyclerAdapter(val activity: LogcatActivity) : RecyclerView.Adapter<LogcatRecyclerAdapter.MainViewHolder>() {
     private var mActivity: LogcatActivity = activity

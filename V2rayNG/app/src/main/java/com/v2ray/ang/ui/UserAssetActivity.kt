@@ -20,9 +20,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivityUserAssetBinding
-import com.v2ray.ang.databinding.ItemRecyclerUserAssetBinding
+import com.mrboomdev.v2rayng2.R
+import com.mrboomdev.v2rayng2.databinding.ActivityUserAssetBinding
+import com.mrboomdev.v2rayng2.databinding.ItemRecyclerUserAssetBinding
 import com.v2ray.ang.dto.AssetUrlItem
 import com.v2ray.ang.extension.concatUrl
 import com.v2ray.ang.extension.toTrafficString
