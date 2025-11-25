@@ -3,11 +3,7 @@ package com.v2ray.ang.handler
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig.PREF_IS_BOOTED
 import com.v2ray.ang.AppConfig.PREF_ROUTING_RULESET
-import com.v2ray.ang.dto.AssetUrlItem
-import com.v2ray.ang.dto.ProfileItem
-import com.v2ray.ang.dto.RulesetItem
-import com.v2ray.ang.dto.ServerAffiliationInfo
-import com.v2ray.ang.dto.SubscriptionItem
+import com.v2ray.ang.dto.*
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.Utils
 
@@ -63,7 +59,7 @@ object MmkvManager {
      *
      * @param serverList The list of server GUIDs.
      */
-    fun encodeServerList(serverList: MutableList<String>) {
+    fun encodeServerList(serverList: List<String>) {
         mainStorage.encode(KEY_ANG_CONFIGS, JsonUtil.toJson(serverList))
     }
 

@@ -1,9 +1,12 @@
 package com.mrboomdev.v2rayng2.ui.screens.home
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,9 +64,20 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val groups by viewModel.groups.collectAsState()
+    val selectedServer by viewModel.selectedServer.collectAsState()
+    val testingState by viewModel.testingState.collectAsState()
+    val pagerState = rememberPagerState { groups.size }
     
     var isSearching by rememberSaveable { mutableStateOf(false) }
     val searchQuery = rememberTextFieldState()
+
+    val vpnPermissionRequestLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if(it.resultCode == RESULT_OK) {
+            viewModel.startVpn()
+        }
+    }
     
     BackHandler(enabled = drawerState.isOpen || isSearching) {
         when {
@@ -78,6 +92,38 @@ fun HomeScreen(
                 searchQuery.clearText()
             }
         }
+    }
+    
+    testingState?.also { testingState -> 
+        AlertDialog(
+            onDismissRequest = {},
+            
+            title = {
+                Text(when(testingState) {
+                    TestingState.Finalizing -> "Final steps"
+                    is TestingState.Testing -> "Testing"
+                    TestingState.UpdatingSubscription -> "Updating subscription"
+                })
+            },
+            
+            text = {
+                Text(when(val state = testingState) {
+                    TestingState.Finalizing -> "Not so much stuff has left. Wait just a little bit..."
+                    is TestingState.Testing -> "${state.done}/${state.total}\nWe are checking which servers are working..."
+                    TestingState.UpdatingSubscription -> "Please wait a little bit. If subscription is large it can take a while..."
+                })
+            },
+            
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.cancelTest()
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     ModalNavigationDrawer(
@@ -198,7 +244,10 @@ fun HomeScreen(
 
                         IconButton(
                             onClick = {
-                                activity.toast("Not implemented yet!")
+                                viewModel.requestUpdate(
+                                    groupId = groups[pagerState.currentPage].first,
+                                    onComplete = { activity.toast("Done updating") }
+                                )
                             }
                         ) {
                             Icon(
@@ -370,22 +419,42 @@ fun HomeScreen(
                         )
                     }
                     
+                    val isRunning by viewModel.isRunning.collectAsState()
+                    
                     FloatingActionButton(
+                        containerColor = if(isRunning) {
+                            MaterialTheme.colorScheme.primary
+                        } else MaterialTheme.colorScheme.primaryContainer,
+
+                        contentColor = if(isRunning) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else MaterialTheme.colorScheme.primary,
+                        
                         onClick = {
+                            if(viewModel.selectedServer.value == null) {
+                                activity.toast("Select server at first!")
+                                return@FloatingActionButton
+                            }
                             
+                            viewModel.toggleVpn(
+                                onFailure = { intent ->
+                                    vpnPermissionRequestLauncher.launch(intent)
+                                }
+                            )
                         }
                     ) {
                         Icon(
                             modifier = Modifier.size(32.dp),
-                            painter = painterResource(R.drawable.ic_play_filled),
-                            contentDescription = "Start"
+                            contentDescription = null,
+
+                            painter = painterResource(if(isRunning) {
+                                R.drawable.ic_stop_filled
+                            } else R.drawable.ic_play_filled),
                         )
                     }
                 }
             }
         ) { contentPadding ->
-            val pagerState = rememberPagerState { groups.size }
-            
             Column(Modifier.fillMaxSize()) {
                 if(groups.isNotEmpty()) {
                     PrimaryScrollableTabRow(
@@ -491,9 +560,13 @@ fun HomeScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .animateItem(),
+                                            
+                                            color = if(it.guid == selectedServer?.first) {
+                                                MaterialTheme.colorScheme.surfaceContainerHigh
+                                            } else MaterialTheme.colorScheme.surface,
 
                                             onClick = {
-
+                                                viewModel.selectServer(it.guid)
                                             }
                                         ) {
                                             Row(
