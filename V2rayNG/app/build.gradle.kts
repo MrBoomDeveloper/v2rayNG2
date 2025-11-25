@@ -2,18 +2,19 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.jaredsburrows.license")
+    alias(libs.plugins.composeCompiler)
 }
 
 android {
     namespace = "com.mrboomdev.v2rayng2"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mrboomdev.v2rayng2"
-        minSdk = 21
-        targetSdk = 35
-        versionCode = 679
-        versionName = "1.10.28"
+        minSdk = 23
+        targetSdk = 36
+        versionCode = 680
+        versionName = "1.10.29"
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {
@@ -45,6 +46,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        
+        debug {
+            applicationIdSuffix = ".debug"
         }
     }
 
@@ -111,12 +116,21 @@ dependencies {
     implementation(libs.preference.ktx)
     implementation(libs.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation("androidx.core:core-splashscreen:1.2.0")
 
     // UI Libraries
     implementation(libs.material)
     implementation(libs.toasty)
     implementation(libs.editorkit)
     implementation(libs.flexbox)
+    
+    // Jetpack Compose
+    implementation("androidx.compose.runtime:runtime:1.9.5")
+    implementation("androidx.compose.foundation:foundation:1.9.5")
+    implementation("androidx.compose.ui:ui:1.9.5")
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation("androidx.activity:activity-compose:1.12.0")
 
     // Data and Storage Libraries
     implementation(libs.mmkv.static)

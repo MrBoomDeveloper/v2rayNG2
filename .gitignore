@@ -64,3 +64,6 @@ V2rayNG/app/google-services.json
 # Ignore OS-specific files
 Thumbs.db
 .DS_Store
+
+V2rayNG/app/libs/
+V2rayNG/app/release/

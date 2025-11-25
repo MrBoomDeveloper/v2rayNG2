@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -20,7 +19,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -29,23 +27,22 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
-import com.v2ray.ang.AppConfig
-import com.v2ray.ang.AppConfig.VPN
 import com.mrboomdev.v2rayng2.R
 import com.mrboomdev.v2rayng2.databinding.ActivityMainBinding
 import com.mrboomdev.v2rayng2.utils.colorStateListOf
 import com.mrboomdev.v2rayng2.utils.setColor
+import com.v2ray.ang.AppConfig
+import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MigrateManager
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.handler.V2RayServiceManager
+import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.buffer
@@ -348,7 +345,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 mainViewModel.testAllRealPingSync(this@MainActivity)
                     .buffer(Runtime.getRuntime().availableProcessors())
                     .collect { (tested, total) ->
-                        withContext(Dispatchers.Main) { dialog.setMessage("${tested}/${total}") } 
+                        launch(Dispatchers.Main) { dialog.setMessage("${tested}/${total}") } 
                     }
                 
                 withContext(Dispatchers.Main) {
@@ -502,8 +499,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     /**
      * import config from clipboard
      */
-    private fun importClipboard()
-            : Boolean {
+    private fun importClipboard(): Boolean {
         try {
             val clipboard = Utils.getClipboard(this)
             importBatchConfig(clipboard)

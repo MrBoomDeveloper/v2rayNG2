@@ -11,9 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
-import com.mrboomdev.v2rayng2.R
 import com.v2ray.ang.AppConfig.MSG_MEASURE_CONFIG_SUCCESS
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.dto.ServersCache
@@ -28,19 +28,11 @@ import com.v2ray.ang.service.V2RayTestService.Companion.startRealPing
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
 import go.Seq
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.launch
 import libv2ray.Libv2ray
-import java.util.Collections
-import java.util.concurrent.Executors
+import java.util.*
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = MmkvManager.decodeServerList()
@@ -275,12 +267,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Libv2ray.initCoreEnv(Utils.userAssetPath(context), Utils.getDeviceIdForXUDPBaseKey())
             
             for(server in serversCopy) {
-                launch(Dispatchers.IO) {
+                launch(Dispatchers.Default) {
                     val result = startRealPing(context, server.guid)
-                    MessageUtil.sendMsg2UI(context, MSG_MEASURE_CONFIG_SUCCESS, Pair(server.guid, result))
                     
                     count++
                     send(count to serversCopy.size)
+                    
+                    MessageUtil.sendMsg2UI(context, MSG_MEASURE_CONFIG_SUCCESS, Pair(server.guid, result))
                 }
             }
         }
