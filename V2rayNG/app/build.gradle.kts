@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     id("com.jaredsburrows.license")
     alias(libs.plugins.composeCompiler)
 }
@@ -11,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.mrboomdev.v2rayng2"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode = 680
         versionName = "1.10.29"
@@ -116,7 +117,7 @@ dependencies {
     implementation(libs.preference.ktx)
     implementation(libs.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation(libs.androidx.core.splashscreen)
 
     // UI Libraries
     implementation(libs.material)
@@ -125,12 +126,13 @@ dependencies {
     implementation(libs.flexbox)
     
     // Jetpack Compose
-    implementation("androidx.compose.runtime:runtime:1.9.5")
-    implementation("androidx.compose.foundation:foundation:1.9.5")
-    implementation("androidx.compose.ui:ui:1.9.5")
-    implementation("androidx.compose.material3:material3:1.4.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("androidx.activity:activity-compose:1.12.0")
+    implementation(libs.androidx.runtime)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.activity.compose)
+    implementation("ru.mrboomdev.navigation:navigation-jetpack:1.4.1")
 
     // Data and Storage Libraries
     implementation(libs.mmkv.static)

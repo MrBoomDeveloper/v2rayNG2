@@ -9,10 +9,14 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composer
 import androidx.compose.runtime.ExperimentalComposeRuntimeApi
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.tooling.ComposeStackTraceMode
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.mrboomdev.navigation.core.sealedNavigationGraph
+import com.mrboomdev.navigation.jetpack.JetpackNavigationHost
+import com.mrboomdev.navigation.jetpack.rememberJetpackNavigation
 import com.mrboomdev.v2rayng2.BuildConfig
-import com.mrboomdev.v2rayng2.ui.screens.home.HomeScreen
 
 class MainActivity2: AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class, ExperimentalComposeRuntimeApi::class)
@@ -22,7 +26,7 @@ class MainActivity2: AppCompatActivity() {
         enableEdgeToEdge()
         
         if(BuildConfig.DEBUG) {
-            Composer.setDiagnosticStackTraceEnabled(true)
+            Composer.setDiagnosticStackTraceMode(ComposeStackTraceMode.SourceInformation)
         }
         
         setContent {
@@ -37,7 +41,14 @@ class MainActivity2: AppCompatActivity() {
                     } else lightColorScheme()
                 }
             ) {
-                HomeScreen()
+                JetpackNavigationHost<Routes>(
+                    navigation = rememberJetpackNavigation(Routes.SimpleDashboard),
+                    graph = remember {
+                        sealedNavigationGraph { 
+                            it.Content()
+                        }
+                    }
+                )
             }
         }
     }

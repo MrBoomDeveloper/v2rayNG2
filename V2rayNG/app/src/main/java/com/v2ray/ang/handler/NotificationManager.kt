@@ -1,28 +1,19 @@
 package com.v2ray.ang.handler
 
-import android.app.Notification
-import android.app.NotificationChannel
+import android.app.*
 import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.v2ray.ang.AppConfig
 import com.mrboomdev.v2rayng2.R
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.ProfileItem
 import com.v2ray.ang.extension.toSpeedString
-import com.v2ray.ang.handler.V2RayServiceManager
 import com.v2ray.ang.ui.MainActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.math.min
 
 object NotificationManager {
@@ -150,6 +141,7 @@ object NotificationManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
         } else {
+            @Suppress("DEPRECATION")
             service.stopForeground(true)
         }
 

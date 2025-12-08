@@ -37,10 +37,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mrboomdev.navigation.core.plusAssign
 import com.mrboomdev.v2rayng2.R
 import com.mrboomdev.v2rayng2.ui.FontFamilies
+import com.mrboomdev.v2rayng2.ui.Navigation
+import com.mrboomdev.v2rayng2.ui.Routes
 import com.mrboomdev.v2rayng2.ui.components.InfoBox
 import com.mrboomdev.v2rayng2.utils.exclude
+import com.v2ray.ang.dto.EConfigType
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.ui.*
@@ -61,6 +65,7 @@ fun HomeScreen(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val activity = LocalActivity.current!!
+    val navigation = Navigation.current()
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val groups by viewModel.groups.collectAsState()
@@ -232,6 +237,19 @@ fun HomeScreen(
                     actions = {
                         IconButton(
                             onClick = {
+                                navigation.clear()
+                                navigation += Routes.SimpleDashboard
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.padding(6.dp),
+                                painter = painterResource(R.drawable.ic_emoticon),
+                                contentDescription = "Back to simple mode"
+                            )
+                        }
+                        
+                        IconButton(
+                            onClick = {
                                 isSearching = true
                             }
                         ) {
@@ -371,14 +389,14 @@ fun HomeScreen(
                                 )
 
                                 listOf(
-                                    "a" to "VMess",
-                                    "b" to "VLESS",
-                                    "d" to "Shadowsocks",
-                                    "1" to "SOCKS",
-                                    "2" to "HTTP",
-                                    "c" to "Trojan",
-                                    "e" to "WireGuard",
-                                    "h" to "Hysteria2"
+                                    EConfigType.VMESS to "VMess",
+                                    EConfigType.VLESS to "VLESS",
+                                    EConfigType.SHADOWSOCKS to "Shadowsocks",
+                                    EConfigType.SOCKS to "SOCKS",
+                                    EConfigType.HTTP to "HTTP",
+                                    EConfigType.TROJAN to "Trojan",
+                                    EConfigType.WIREGUARD to "WireGuard",
+                                    EConfigType.HYSTERIA2 to "Hysteria2"
                                 ).forEach { (key, title) ->
                                     DropdownMenuItem(
                                         contentPadding = PaddingValues(horizontal = 24.dp),
@@ -392,7 +410,16 @@ fun HomeScreen(
 
                                         onClick = {
                                             showDropdown = false
-                                            activity.toast("Not implemented yet!")
+
+                                            val currentGroup =
+                                                groups.getOrNull(pagerState.currentPage) ?: return@DropdownMenuItem
+
+                                            activity.startActivity(
+                                                Intent()
+                                                    .putExtra("createConfigType", key.value)
+                                                    .putExtra("subscriptionId", currentGroup.first)
+                                                    .setClass(activity, ServerActivity::class.java)
+                                            )
                                         }
                                     )
                                 }
@@ -413,7 +440,7 @@ fun HomeScreen(
                         }
                     ) {
                         Icon(
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(24.dp),
                             painter = painterResource(R.drawable.ic_magic_filled),
                             contentDescription = "Automatically pick best"
                         )
@@ -726,8 +753,8 @@ private fun HomeSideSheet(
     ModalDrawerSheet {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
         ) {
             Text(
                 modifier = Modifier.padding(
