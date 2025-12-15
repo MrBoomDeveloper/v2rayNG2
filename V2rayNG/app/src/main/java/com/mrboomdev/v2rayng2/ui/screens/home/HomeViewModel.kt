@@ -142,7 +142,7 @@ class HomeViewModel(
             removeDuplicates(groupId)
 
             _testingState.emit(TestingState.Testing(0, 0))
-            testAllRealPingSync(groupId).buffer(5).collect { (done, total) ->
+            testAllRealPingSync(groupId).buffer(15).collect { (done, total) ->
                 _testingState.emit(TestingState.Testing(done, total))
             }
             

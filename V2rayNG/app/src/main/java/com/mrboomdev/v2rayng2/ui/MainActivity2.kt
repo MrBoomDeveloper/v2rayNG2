@@ -13,16 +13,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.tooling.ComposeStackTraceMode
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.material.color.DynamicColors
 import com.mrboomdev.navigation.core.sealedNavigationGraph
 import com.mrboomdev.navigation.jetpack.JetpackNavigationHost
 import com.mrboomdev.navigation.jetpack.rememberJetpackNavigation
 import com.mrboomdev.v2rayng2.BuildConfig
 
 class MainActivity2: AppCompatActivity() {
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class, ExperimentalComposeRuntimeApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class, ExperimentalComposeRuntimeApi::class,
+        ExperimentalMaterial3ExpressiveApi::class
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
+        DynamicColors.applyToActivityIfAvailable(this)
         enableEdgeToEdge()
         
         if(BuildConfig.DEBUG) {
@@ -30,7 +34,7 @@ class MainActivity2: AppCompatActivity() {
         }
         
         setContent {
-            MaterialTheme(
+            MaterialExpressiveTheme(
                 colorScheme = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     if(isSystemInDarkTheme()) {
                         dynamicDarkColorScheme(this)
@@ -38,7 +42,7 @@ class MainActivity2: AppCompatActivity() {
                 } else {
                     if(isSystemInDarkTheme()) {
                         darkColorScheme()
-                    } else lightColorScheme()
+                    } else expressiveLightColorScheme()
                 }
             ) {
                 JetpackNavigationHost<Routes>(

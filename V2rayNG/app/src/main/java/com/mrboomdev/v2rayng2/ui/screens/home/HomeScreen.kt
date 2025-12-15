@@ -84,7 +84,7 @@ fun HomeScreen(
         }
     }
     
-    BackHandler(enabled = drawerState.isOpen || isSearching) {
+    BackHandler {
         when {
             drawerState.isOpen -> {
                 coroutineScope.launch {
@@ -95,6 +95,11 @@ fun HomeScreen(
             isSearching -> {
                 isSearching = false
                 searchQuery.clearText()
+            }
+            
+            else -> {
+                navigation.clear()
+                navigation += Routes.SimpleDashboard
             }
         }
     }

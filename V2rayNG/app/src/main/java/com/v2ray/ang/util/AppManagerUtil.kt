@@ -20,7 +20,7 @@ object AppManagerUtil {
             val packages = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
             val apps = ArrayList<AppInfo>()
 
-            for (pkg in packages) {
+            for(pkg in packages) {
                 val applicationInfo = pkg.applicationInfo ?: continue
 
                 val appName = applicationInfo.loadLabel(packageManager).toString()
