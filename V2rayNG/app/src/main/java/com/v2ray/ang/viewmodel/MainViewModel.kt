@@ -340,24 +340,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun removeDuplicateServer(): Int {
         val serversCacheCopy = mutableListOf<Pair<String, ProfileItem>>()
-        for (it in serversCache) {
+        for(it in serversCache) {
             val config = MmkvManager.decodeServerConfig(it.guid) ?: continue
-            serversCacheCopy.add(Pair(it.guid, config))
+            serversCacheCopy.add(it.guid to config)
         }
 
         val deleteServer = mutableListOf<String>()
         serversCacheCopy.forEachIndexed { index, it ->
             val outbound = it.second
             serversCacheCopy.forEachIndexed { index2, it2 ->
-                if (index2 > index) {
+                if(index2 > index) {
                     val outbound2 = it2.second
-                    if (outbound.equals(outbound2) && !deleteServer.contains(it2.first)) {
+                    if(outbound == outbound2 && !deleteServer.contains(it2.first)) {
                         deleteServer.add(it2.first)
                     }
                 }
             }
         }
-        for (it in deleteServer) {
+        
+        for(it in deleteServer) {
             MmkvManager.removeServer(it)
         }
 

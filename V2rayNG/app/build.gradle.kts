@@ -137,6 +137,10 @@ dependencies {
     // Data and Storage Libraries
     implementation(libs.mmkv.static)
     implementation(libs.gson)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("com.russhwolf:multiplatform-settings:1.3.0")
+    implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0")
+    implementation("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
 
     // Reactive and Utility Libraries
     implementation(libs.kotlinx.coroutines.android)

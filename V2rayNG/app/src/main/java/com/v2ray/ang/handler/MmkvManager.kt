@@ -6,6 +6,7 @@ import com.v2ray.ang.AppConfig.PREF_ROUTING_RULESET
 import com.v2ray.ang.dto.*
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.Utils
+import kotlinx.serialization.json.Json
 
 object MmkvManager {
 
@@ -179,14 +180,10 @@ object MmkvManager {
      * @return The server affiliation information.
      */
     fun decodeServerAffiliationInfo(guid: String): ServerAffiliationInfo? {
-        if (guid.isBlank()) {
-            return null
-        }
+        if(guid.isBlank()) return null
         val json = serverAffStorage.decodeString(guid)
-        if (json.isNullOrBlank()) {
-            return null
-        }
-        return JsonUtil.fromJson(json, ServerAffiliationInfo::class.java)
+        if(json.isNullOrBlank()) return null
+        return Json.decodeFromString<ServerAffiliationInfo>(json)
     }
 
     /**
@@ -201,7 +198,7 @@ object MmkvManager {
         }
         val aff = decodeServerAffiliationInfo(guid) ?: ServerAffiliationInfo()
         aff.testDelayMillis = testResult
-        serverAffStorage.encode(guid, JsonUtil.toJson(aff))
+        serverAffStorage.encode(guid, Json.encodeToString(aff))
     }
 
     /**
@@ -557,10 +554,6 @@ object MmkvManager {
         return settingsStorage.decodeStringSet(key)
     }
 
-    //endregion
-
-    //region Others
-
     /**
      * Encodes the start on boot setting.
      *
@@ -578,7 +571,4 @@ object MmkvManager {
     fun decodeStartOnBoot(): Boolean {
         return decodeSettingsBool(PREF_IS_BOOTED, false)
     }
-
-    //endregion
-
 }

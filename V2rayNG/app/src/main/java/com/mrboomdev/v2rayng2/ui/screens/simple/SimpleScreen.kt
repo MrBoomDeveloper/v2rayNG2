@@ -2,6 +2,8 @@ package com.mrboomdev.v2rayng2.ui.screens.simple
 
 import android.content.Intent
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -10,15 +12,16 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -29,12 +32,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.savedstate.compose.serialization.serializers.SnapshotStateMapSerializer
 import com.mrboomdev.navigation.core.plusAssign
 import com.mrboomdev.v2rayng2.R
 import com.mrboomdev.v2rayng2.ui.FontFamilies
 import com.mrboomdev.v2rayng2.ui.Navigation
 import com.mrboomdev.v2rayng2.ui.Routes
 import com.v2ray.ang.ui.SubSettingActivity
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -47,9 +52,19 @@ fun SimpleScreen(
     val activity = LocalActivity.current!!
     val navigation = Navigation.current()
 
+    val groups by viewModel.groups.collectAsState()
     val currentGroup by viewModel.selectedGroup.collectAsState()
     val currentConfiguration by viewModel.selectedServer.collectAsState()
     val state by viewModel.state.collectAsState()
+    
+    val coroutineScope = rememberCoroutineScope()
+    val snackBarState = remember { SnackbarHostState() }
+    var showSelectGroupsDialog by rememberSaveable { mutableStateOf(false) }
+    
+    val activityLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { viewModel.init() }
+    )
     
     Scaffold(
         topBar = {
@@ -65,7 +80,7 @@ fun SimpleScreen(
                     IconButton(
                         enabled = !state.isLoading,
                         onClick = {
-                            activity.startActivity(Intent(activity, SubSettingActivity::class.java))
+                            activityLauncher.launch(Intent(activity, SubSettingActivity::class.java))
                         }
                     ) {
                         Icon(
@@ -76,6 +91,18 @@ fun SimpleScreen(
                     }
                 }
             )
+        },
+        
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackBarState
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            }
         },
         
         floatingActionButton = {
@@ -165,8 +192,7 @@ fun SimpleScreen(
                                 if (isButtonPressed) .95f else 1f,
                                 spring(stiffness = Spring.StiffnessLow)
                             ).value
-                        )
-                        .alpha(animateFloatAsState(if (state.isLoading) 0f else 1f).value)
+                        ).alpha(animateFloatAsState(if (state.isLoading) 0f else 1f).value)
                         .scale(animateFloatAsState(if (state.isLoading) .5f else 1f).value),
 
                     interactionSource = buttonInteractionSource,
@@ -184,6 +210,11 @@ fun SimpleScreen(
                     ),
 
                     onClick = {
+                        if(groups.none { it.second.enabled }) {
+                            coroutineScope.launch { snackBarState.showSnackbar("None groups are selected!") }
+                            return@Button
+                        }
+                        
                         viewModel.toggle()
                     }
                 ) {
@@ -232,22 +263,22 @@ fun SimpleScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        currentGroup?.also { group ->
-                            Text(
-                                style = MaterialTheme.typography.labelMedium,
-                                fontFamily = FontFamilies.googleSansFlex,
-                                text = "From group: ${group.second.remarks}",
-    
-                                color = if (state.isLoading) {
-                                    Color.Unspecified
-                                } else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+//                        currentGroup?.also { group ->
+//                            Text(
+//                                style = MaterialTheme.typography.labelMedium,
+//                                fontFamily = FontFamilies.googleSansFlex,
+//                                text = "From group: ${group.second.remarks}",
+//    
+//                                color = if (state.isLoading) {
+//                                    Color.Unspecified
+//                                } else MaterialTheme.colorScheme.onSurfaceVariant
+//                            )
+//                        }
     
                         Text(
                             style = MaterialTheme.typography.labelLarge,
                             fontFamily = FontFamilies.googleSansFlex,
-                            text = currentConfiguration?.second?.remarks ?: "None",
+                            text = currentConfiguration?.second?.remarks ?: "",
     
                             color = if (state.isLoading) {
                                 Color.Unspecified
@@ -263,7 +294,7 @@ fun SimpleScreen(
     
                     style = MaterialTheme.typography.titleMedium,
                     fontFamily = FontFamilies.googleSansFlex,
-                    text = "Selected group"
+                    text = "Selected groups"
                 )
     
                 OutlinedButton(
@@ -271,14 +302,27 @@ fun SimpleScreen(
                     contentPadding = PaddingValues(vertical = 16.dp, horizontal = 20.dp),
                     shape = RoundedCornerShape(8.dp),
                     enabled = !state.isLoading,
-                    onClick = {
-    //                    navigation += Routes.Requirements
-                    }
+                    onClick = { showSelectGroupsDialog = true }
                 ) {
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.weight(1f),
                         fontFamily = FontFamilies.googleSansFlex,
-                        text = ""
+                        text = groups.filter { it.second.enabled }.joinToString { it.second.remarks }
+                    )
+
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        fontFamily = FontFamilies.googleSansFlex,
+                        text = currentGroup?.second?.remarks ?: ""
+                    )
+
+                    Icon(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .scale(scaleX = -1f, scaleY = 1f),
+
+                        painter = painterResource(R.drawable.ic_back),
+                        contentDescription = null
                     )
                 }
     
@@ -318,5 +362,87 @@ fun SimpleScreen(
                 }
             }
         }
+    }
+    
+    if(showSelectGroupsDialog) {
+        val enabledGroups = rememberSerializable(groups, serializer = SnapshotStateMapSerializer<String, Boolean>()) { 
+            mutableStateMapOf(*groups.map { it.first to it.second.enabled }.toTypedArray()) 
+        }
+        
+        AlertDialog(
+            onDismissRequest = { showSelectGroupsDialog = false },
+            title = { Text("Selected groups") },
+            
+            text = {
+                if(groups.isEmpty()) {
+                    Text("You don't have any groups")
+                    return@AlertDialog
+                }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) { 
+                    items(
+                        items = groups,
+                        key = { it.first }
+                    ) { group ->
+                        val interactionSource = remember { MutableInteractionSource() }
+                        
+                        Surface(
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(8.dp),
+                            interactionSource = interactionSource,
+                            selected = enabledGroups[group.first] == true,
+                            onClick = { enabledGroups[group.first] = enabledGroups[group.first] != true }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontFamily = FontFamilies.googleSansFlex,
+                                    text = group.second.remarks
+                                )
+
+                                Checkbox(
+                                    checked = enabledGroups[group.first] == true,
+                                    onCheckedChange = { enabledGroups[group.first] = it },
+                                    interactionSource = interactionSource
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.selectGroups(enabledGroups.filter { it.value }.map { it.key }.toSet())
+                        showSelectGroupsDialog = false
+                    }
+                ) {
+                    Text(
+                        fontFamily = FontFamilies.googleSansFlex,
+                        text = "Confirm"
+                    )
+                }
+            },
+            
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showSelectGroupsDialog = false
+                    }
+                ) {
+                    Text(
+                        fontFamily = FontFamilies.googleSansFlex,
+                        text = "Cancel"
+                    )
+                }
+            }
+        )
     }
 }
